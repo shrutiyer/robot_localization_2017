@@ -43,7 +43,7 @@ class Particle(object):
             x: the x-coordinate of the hypothesis relative to the map frame
             y: the y-coordinate of the hypothesis relative ot the map frame
             theta: the yaw of the hypothesis relative to the map frame
-            w: the particle weight (the class does not ensure that particle weights are normalized """ 
+            w: the particle weight (the class does not ensure that particle weights are normalized """
         self.w = w
         self.theta = theta
         self.x = x
@@ -85,7 +85,7 @@ class ParticleFilter:
         self.base_frame = "base_link"   # the frame of the robot base
         self.map_frame = "map"          # the name of the map coordinate frame
         self.odom_frame = "odom"        # the name of the odometry coordinate frame
-        self.scan_topic = "scan"        # the topic where we will get laser scans from 
+        self.scan_topic = "scan"        # the topic where we will get laser scans from
 
         self.n_particles = 300          # the number of particles to use
 
@@ -302,7 +302,7 @@ class ParticleFilter:
         self.publish_particles(msg)
 
     def fix_map_to_odom_transform(self, msg):
-        """ This method constantly updates the offset of the map and 
+        """ This method constantly updates the offset of the map and
             odometry coordinate systems based on the latest results from
             the localizer
             TODO: if you want to learn a lot about tf, reimplement this... I can provide
