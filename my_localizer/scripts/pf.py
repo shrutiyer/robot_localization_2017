@@ -189,10 +189,19 @@ class ParticleFilter:
                 [particle.w for particle in self.particle_cloud], 
                     self.n_particles)
 
-    def update_particles_with_laser(self, msg):
-        """ Updates the particle weights in response to the scan contained in the msg """
+    def update_particles_with_laser(self, laser_scan):
+        """ Updates the particle weights in response to the scan contained in the laser_scan """
         # TODO: implement this
-        pass
+        for particle in self.particle_cloud:
+            for degree, scan_distance in enumerate(laser_scan):
+                radian = math.radians(degree)
+                hypothesis_point = (
+                    particle.x + scan_distance * math.cos(radian),
+                    particle.y + scan_distance * math.sin(radian))
+
+                # TODO: Normalize this error and set it as the weight for the particle
+                # One potential idea is the halfnorm distribution
+                error_distance = self.occupancy_field.get_closest_obstacle_distance(hypothesis_point)
 
     @staticmethod
     def weighted_values(values, probabilities, size):
