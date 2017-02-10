@@ -157,7 +157,17 @@ class ParticleFilter:
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
-        # TODO: modify particles using delta
+        # TODONE: modify particles using delta
+        destination_distance = math.hypot(delta[0], delta[1])
+        destination_heading_theta = math.atan2(delta[1], delta[0])
+        destination_heading_delta = destination_heading_theta - delta[2]
+
+        # TODO: Parallelize this with a library
+        for particle in self.particle_cloud:
+            particle.x += destination_distance * math.cos(particle.theta + destination_heading_delta)
+            particle.y += destination_distance * math.sin(particle.theta + destination_heading_delta)
+            particle.theta += delta[2]
+
         # For added difficulty: Implement sample_motion_odometry (Prob Rob p 136)
 
     def map_calc_range(self,x,y,theta):
