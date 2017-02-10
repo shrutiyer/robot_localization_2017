@@ -95,6 +95,7 @@ class ParticleFilter:
         self.laser_max_distance = 2.0   # maximum penalty to assess in the likelihood field model
 
         # TODO: define additional constants if needed
+        self.sd_xy_theta = (0.5, 0.5, math.pi / 10)
 
         # Setup pubs and subs
 
@@ -220,10 +221,10 @@ class ParticleFilter:
                       particle cloud around.  If this input is ommitted, the odometry will be used """
         if xy_theta == None:
             xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
-        self.particle_cloud = []
-        # TODO create particles
-        self.particle_cloud.append(Particle(xy_theta[0], xy_theta[1], xy_theta[2]))
-        print 'initialize_particle_cloud'
+        self.particle_cloud = [Particle(*arr) for arr in np.random.normal(
+            xy_theta,
+            self.sd_xy_theta,
+            (self.n_particles, len(xy_theta)))]
 
         self.normalize_particles()
         self.update_robot_pose()
@@ -246,19 +247,16 @@ class ParticleFilter:
         """ This is the default logic for what to do when processing scan data.
             Feel free to modify this, however, I hope it will provide a good
             guide.  The input msg is an object of type sensor_msgs/LaserScan """
-        print "scan_received"
         if not(self.initialized):
             # wait for initialization to complete
             return
 
-        print "initialized"
 
         if not(self.tf_listener.canTransform(self.base_frame,msg.header.frame_id,msg.header.stamp)):
             # need to know how to transform the laser to the base frame
             # this will be given by either Gazebo or neato_node
             return
 
-        print "can transform from base to laser"
 
 
         if not(self.tf_listener.canTransform(self.base_frame,self.odom_frame,msg.header.stamp)):
@@ -266,7 +264,6 @@ class ParticleFilter:
             # this will eventually be published by either Gazebo or neato_node
             return
 
-        print "can transform from base_link to odom"
 
 
         # calculate pose of laser relative ot the robot base
@@ -333,7 +330,6 @@ if __name__ == '__main__':
     r = rospy.Rate(5)
 
     while not(rospy.is_shutdown()):
-        print 'running'
         # in the main loop all we do is continuously broadcast the latest map to odom transform
         n.broadcast_last_transform()
         r.sleep()
