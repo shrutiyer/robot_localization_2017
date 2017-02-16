@@ -31,6 +31,7 @@ class OccupancyField(object):
     """
 
     def __init__(self, map):
+        self.MAX_DISTANCE_OUT_OF_BOUNDS = 4
         self.map = map      # save this for later
         # build up a numpy array of the coordinates of each grid cell in the map
         X = np.zeros((self.map.info.width*self.map.info.height,2))
@@ -64,7 +65,7 @@ class OccupancyField(object):
         nbrs = NearestNeighbors(n_neighbors=1,algorithm="ball_tree").fit(O)
         distances, indices = nbrs.kneighbors(X)
 
-        self.closest_occ = {}
+        self.closest_occ = np.zeros(100000000)
         curr = 0
         for i in range(self.map.info.width):
             for j in range(self.map.info.height):
@@ -88,3 +89,21 @@ class OccupancyField(object):
         if ind >= self.map.info.width*self.map.info.height or ind < 0:
             return float('nan')
         return self.closest_occ[ind]
+
+    def get_closest_obstacle_distance_matrix(self, x_array, y_array):
+        x_coord_array = np.divide(np.subtract(x_array, self.map.info.origin.position.x), self.map.info.resolution)
+        y_coord_array = np.divide(np.subtract(y_array, self.map.info.origin.position.y), self.map.info.resolution)
+        x_coord_array = x_coord_array.astype(int)
+        y_coord_array = y_coord_array.astype(int)
+
+        x_nan_indexes = np.where(np.logical_or(x_coord_array > self.map.info.width, x_coord_array < 0))
+        y_nan_indexes = np.where(np.logical_or(y_coord_array > self.map.info.height, y_coord_array < 0))
+        out_of_bounds_indexes = np.unique(np.append(x_nan_indexes, y_nan_indexes))
+
+        np.delete(x_coord_array, out_of_bounds_indexes)
+        np.delete(y_coord_array, out_of_bounds_indexes)
+
+        ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
+
+        # Returns the sum of the distances of all points.
+        return np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS

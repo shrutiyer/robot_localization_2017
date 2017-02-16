@@ -23,6 +23,7 @@ import numpy as np
 from numpy.random import random_sample
 from sklearn.neighbors import NearestNeighbors
 from occupancy_field import OccupancyField
+from scipy.stats import halfnorm
 
 from helper_functions import (convert_pose_inverse_transform,
                               convert_translation_rotation_to_pose,
@@ -191,17 +192,12 @@ class ParticleFilter:
 
     def update_particles_with_laser(self, laser_scan):
         """ Updates the particle weights in response to the scan contained in the laser_scan """
-        # TODO: implement this
+        # TODONE: implement this
         for particle in self.particle_cloud:
-            for degree, scan_distance in enumerate(laser_scan):
-                radian = math.radians(degree)
-                hypothesis_point = (
-                    particle.x + scan_distance * math.cos(radian),
-                    particle.y + scan_distance * math.sin(radian))
-
-                # TODO: Normalize this error and set it as the weight for the particle
-                # One potential idea is the halfnorm distribution
-                error_distance = self.occupancy_field.get_closest_obstacle_distance(hypothesis_point)
+            radians = np.arange(0, 2*math.pi, math.pi/180)
+            x_arr = np.add(particle.x, np.multiply(laser_scan.ranges[0:360], np.cos(radians)))
+            y_arr = np.add(particle.y, np.multiply(laser_scan.ranges[0:360], np.sin(radians)))
+            particle.weight = self.occupancy_field.get_closest_obstacle_distance_matrix(x_arr, y_arr)
 
     @staticmethod
     def weighted_values(values, probabilities, size):
