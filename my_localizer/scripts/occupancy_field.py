@@ -31,7 +31,7 @@ class OccupancyField(object):
     """
 
     def __init__(self, map):
-        self.MAX_DISTANCE_OUT_OF_BOUNDS = 4
+        self.MAX_DISTANCE_OUT_OF_BOUNDS = 4 # When point is out of the map, we set a placeholder error (or max distance of laser)
         self.map = map      # save this for later
         # build up a numpy array of the coordinates of each grid cell in the map
         X = np.zeros((self.map.info.width*self.map.info.height,2))
@@ -65,7 +65,7 @@ class OccupancyField(object):
         nbrs = NearestNeighbors(n_neighbors=1,algorithm="ball_tree").fit(O)
         distances, indices = nbrs.kneighbors(X)
 
-        self.closest_occ = np.zeros(100000000)
+        self.closest_occ = np.zeros(100000000) # TODO: Figure out how to make this array dynamic to the input map.
         curr = 0
         for i in range(self.map.info.width):
             for j in range(self.map.info.height):
