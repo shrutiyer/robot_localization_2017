@@ -22,6 +22,8 @@ import numpy as np
 from numpy.random import random_sample
 from sklearn.neighbors import NearestNeighbors
 
+from scipy.stats import halfnorm
+
 class OccupancyField(object):
     """ Stores an occupancy field for an input map.  An occupancy field returns the distance to the closest
         obstacle for any coordinate in the map
@@ -106,4 +108,4 @@ class OccupancyField(object):
         ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
 
         # Returns the sum of the distances of all points.
-        return np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS
+        return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=400)
