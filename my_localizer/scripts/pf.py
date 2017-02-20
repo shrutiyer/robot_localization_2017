@@ -167,7 +167,6 @@ class ParticleFilter:
             particle.x += destination_distance * math.cos(particle.theta - destination_heading_theta)
             particle.y += destination_distance * math.sin(particle.theta - destination_heading_theta)
             particle.theta += delta[2]
-
         # For added difficulty: Implement sample_motion_odometry (Prob Rob p 136)
 
     def map_calc_range(self,x,y,theta):
@@ -187,6 +186,12 @@ class ParticleFilter:
             self.particle_cloud, 
             [particle.w for particle in self.particle_cloud], 
             self.n_particles)
+        noise = np.random.normal(0,0.2,300) # Mean of 0, SD of ~0.2
+        noise_scale = 0.1
+        for index, particle in enumerate(self.particle_cloud):
+            particle.x += noise[index]*noise_scale
+            particle.y += noise[index]*noise_scale
+            particle.theta += noise[index]
 
     def update_particles_with_laser(self, laser_scan):
         """ Updates the particle weights in response to the scan contained in the laser_scan """
