@@ -108,4 +108,4 @@ class OccupancyField(object):
         ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
 
         # Returns the sum of the distances of all points.
-        return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=400)
+        return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=100)
