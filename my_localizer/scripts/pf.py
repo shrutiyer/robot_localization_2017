@@ -110,7 +110,7 @@ class ParticleFilter:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.particle_cloud = []
-        self.most_probable_particle = Particle()
+        self.most_probable_particle = Particle() # Save the most probable particle here
 
         self.current_odom_xy_theta = [0, 0, 0]
 
@@ -120,7 +120,7 @@ class ParticleFilter:
         rospy.wait_for_service('static_map')
         self.map = rospy.ServiceProxy('static_map', GetMap)().map
 
-        # DONE: for now we have commented out the occupancy field initialization until you can successfully fetch the map
+        # DONE: uncommented the occupancy field initialization after you can successfully fetch the map
         self.occupancy_field = OccupancyField(self.map)
         self.initialized = True
 
@@ -159,12 +159,15 @@ class ParticleFilter:
             return
 
         # TODONE: modify particles using delta
-        destination_distance = math.hypot(delta[0], delta[1])
+        destination_distance = math.hypot(delta[0], delta[1]) # distance between old and new odom
+        # Angle to move by in order to change the heading to new theta
         destination_heading_theta = self.current_odom_xy_theta[2] - math.atan2(delta[1], delta[0])
 
         # TODO: Parallelize this with a library
         for particle in self.particle_cloud:
+            # Cosine of the particle heading - destination heading gives us the x component
             particle.x += destination_distance * math.cos(particle.theta - destination_heading_theta)
+            # Sine of the particle heading - destination heading gives us the y component
             particle.y += destination_distance * math.sin(particle.theta - destination_heading_theta)
             particle.theta += delta[2]
         # For added difficulty: Implement sample_motion_odometry (Prob Rob p 136)
@@ -186,8 +189,9 @@ class ParticleFilter:
             self.particle_cloud, 
             [particle.w for particle in self.particle_cloud], 
             self.n_particles)
-        noise = np.random.normal(0,0.2,300) # Mean of 0, SD of ~0.2
-        noise_scale = 0.1
+        # Random distribution with Mean of 0, SD of ~0.2 for 300 particles
+        noise = np.random.normal(0,0.2,300) 
+        noise_scale = 0.1 # Scale the x and y distance for particles. Much less noise is needed for x & y
         for index, particle in enumerate(self.particle_cloud):
             particle.x += noise[index]*noise_scale
             particle.y += noise[index]*noise_scale
@@ -242,6 +246,7 @@ class ParticleFilter:
                       particle cloud around.  If this input is ommitted, the odometry will be used """
         if xy_theta == None:
             xy_theta = convert_pose_to_xy_and_theta(self.odom_pose.pose)
+        # Create random array of particles
         self.particle_cloud = [Particle(*arr) for arr in np.random.normal(
             xy_theta,
             self.sd_xy_theta,
@@ -261,6 +266,7 @@ class ParticleFilter:
         for particle in self.particle_cloud:
             particle.w /= s 
             if particle.w > self.most_probable_particle.w:
+                # Save the particle with the highest weight
                 self.most_probable_particle = particle
 
     def publish_particles(self, msg):
