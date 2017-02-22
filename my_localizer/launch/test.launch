@@ -2,10 +2,15 @@
   <!-- Map server -->
   <arg name="map_file"/>
   <arg name="scan_topic" default="stable_scan"/>
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+  <node
+    name="map_server"
+    pkg="map_server"
+    type="map_server"
+    args="$(find my_localizer)/maps/ac109_1.yaml"/>
 
   <!-- Localization -->
   <node name="pf" pkg="my_localizer" type="pf.py" output="screen">
+    <rosparam command="load" file="./my_localizer/config/pf.yaml"/>
     <remap from="scan" to="$(arg scan_topic)"/>
   </node>
 </launch>

@@ -1,59 +1,33 @@
 #!/usr/bin/env python
 """ This is the starter code for the robot localization project """
 
+import math
+import time
+import numpy as np
+from copy import deepcopy
+from random import gauss
+from numpy.random import random_sample
+from sklearn.neighbors import NearestNeighbors
+
 import rospy
 
 from std_msgs.msg import Header, String
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, PoseArray, Pose, Point, Quaternion
 from nav_msgs.srv import GetMap
-from copy import deepcopy
 
 import tf
 from tf import TransformListener
 from tf import TransformBroadcaster
 from tf.transformations import euler_from_quaternion, rotation_matrix, quaternion_from_matrix
-from random import gauss
 
-import math
-import time
-
-import numpy as np
-from numpy.random import random_sample
-from sklearn.neighbors import NearestNeighbors
 from occupancy_field import OccupancyField
+from particle import Particle
 
 from helper_functions import (convert_pose_inverse_transform,
                               convert_translation_rotation_to_pose,
                               convert_pose_to_xy_and_theta,
                               angle_diff)
-
-class Particle(object):
-    """ Represents a hypothesis (particle) of the robot's pose consisting of x,y and theta (yaw)
-        Attributes:
-            x: the x-coordinate of the hypothesis relative to the map frame
-            y: the y-coordinate of the hypothesis relative ot the map frame
-            theta: the yaw of the hypothesis relative to the map frame
-            w: the particle weight (the class does not ensure that particle weights are normalized
-    """
-
-    def __init__(self,x=0.0,y=0.0,theta=0.0,w=0.00001):
-        """ Construct a new Particle
-            x: the x-coordinate of the hypothesis relative to the map frame
-            y: the y-coordinate of the hypothesis relative ot the map frame
-            theta: the yaw of the hypothesis relative to the map frame
-            w: the particle weight (the class does not ensure that particle weights are normalized """
-        self.w = w
-        self.theta = theta
-        self.x = x
-        self.y = y
-
-    def as_pose(self):
-        """ A helper function to convert a particle to a geometry_msgs/Pose message """
-        orientation_tuple = tf.transformations.quaternion_from_euler(0,0,self.theta)
-        return Pose(position=Point(x=self.x,y=self.y,z=0), orientation=Quaternion(x=orientation_tuple[0], y=orientation_tuple[1], z=orientation_tuple[2], w=orientation_tuple[3]))
-
-    # TODO: define additional helper functions if needed
 
 class ParticleFilter:
     """ The class that represents a Particle Filter ROS Node
@@ -136,7 +110,7 @@ class ParticleFilter:
         # TODONE: assign the lastest pose into self.robot_pose as a geometry_msgs.Pose object
         # just to get started we will fix the robot's pose to always be at the origin
         self.robot_pose = self.most_probable_particle.as_pose()
-       
+
     def update_particles_with_odom(self, msg):
         """ Update the particles using the newly given odometry pose.
             The function computes the value delta which is a tuple (x,y,theta)
@@ -186,8 +160,8 @@ class ParticleFilter:
         # make sure the distribution is normalized
         self.normalize_particles()
         self.particle_cloud = ParticleFilter.draw_random_sample(
-            self.particle_cloud, 
-            [particle.w for particle in self.particle_cloud], 
+            self.particle_cloud,
+            [particle.w for particle in self.particle_cloud],
             self.n_particles)
         # Random distribution with Mean of 0, SD of ~0.2 for 300 particles
         noise = np.random.normal(0,0.2,300) 
@@ -257,14 +231,14 @@ class ParticleFilter:
 
     def normalize_particles(self):
         """ Make sure the particle weights define a valid distribution (i.e. sum to 1.0) """
-        
+
         # find the sum of particle weights
         s = sum([particle.w for particle in self.particle_cloud])
 
         self.most_probable_particle = Particle()
         # iterate through particle cloud to normalize
         for particle in self.particle_cloud:
-            particle.w /= s 
+            particle.w /= s
             if particle.w > self.most_probable_particle.w:
                 # Save the particle with the highest weight
                 self.most_probable_particle = particle
@@ -321,7 +295,7 @@ class ParticleFilter:
             self.current_odom_xy_theta = new_odom_xy_theta
             # update our map to odom transform now that the particles are initialized
             self.fix_map_to_odom_transform(msg)
-    
+
         elif (math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.d_thresh or
               math.fabs(new_odom_xy_theta[1] - self.current_odom_xy_theta[1]) > self.d_thresh or
               math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.a_thresh):
@@ -331,7 +305,7 @@ class ParticleFilter:
             self.update_robot_pose()                # update robot's pose
             self.resample_particles()               # resample particles to focus on areas of high density
             self.fix_map_to_odom_transform(msg)     # update map to odom transform now that we have new particles
-        
+
         # publish particles (so things like rviz can see them)
         self.publish_particles(msg)
 
