@@ -93,6 +93,8 @@ class OccupancyField(object):
         return self.closest_occ[ind]
 
     def get_closest_obstacle_distance_matrix(self, x_array, y_array):
+        """ The math below is same as the function 'get_closest_obstacle_distance' except
+            that it accepts arrays for x and y to speed up the calculation"""
         x_coord_array = np.divide(np.subtract(x_array, self.map.info.origin.position.x), self.map.info.resolution)
         y_coord_array = np.divide(np.subtract(y_array, self.map.info.origin.position.y), self.map.info.resolution)
         x_coord_array = x_coord_array.astype(int)
