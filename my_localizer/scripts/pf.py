@@ -163,9 +163,10 @@ class ParticleFilter:
             self.particle_cloud,
             [particle.w for particle in self.particle_cloud],
             self.n_particles)
+
         # Random distribution with Mean of 0, SD of ~0.2 for 300 particles
-        noise = np.random.normal(0,0.2,300) 
-        noise_scale = 0.1 # Scale the x and y distance for particles. Much less noise is needed for x & y
+        noise = np.random.normal(0,0.2,300)
+        noise_scale = 0.2 # Scale the x and y distance for particles. Much less noise is needed for x & y
         for index, particle in enumerate(self.particle_cloud):
             particle.x += noise[index]*noise_scale
             particle.y += noise[index]*noise_scale
@@ -176,8 +177,8 @@ class ParticleFilter:
         # TODONE: implement this
         for particle in self.particle_cloud:
             radians = np.arange(0, 2*math.pi, math.pi/180)
-            x_arr = np.add(particle.x, np.multiply(laser_scan.ranges[0:360], np.cos(radians)))
-            y_arr = np.add(particle.y, np.multiply(laser_scan.ranges[0:360], np.sin(radians)))
+            x_arr = np.add(particle.x, np.multiply(laser_scan.ranges[0:360], np.cos(radians + particle.theta)))
+            y_arr = np.add(particle.y, np.multiply(laser_scan.ranges[0:360], np.sin(radians + particle.theta)))
             particle.w = self.occupancy_field.get_closest_obstacle_distance_matrix(x_arr, y_arr)
 
     @staticmethod

@@ -1,2 +1,4 @@
-max_distance_out_of_bounds: 5
-error_distribution_scale: 100
+max_distance_out_of_bounds: 4
+# error_distribution_scale: 0.01
+error_distribution_scale: 0.007
+# error_distribution_scale: 0.003
