@@ -84,7 +84,7 @@ class ParticleFilter:
         self.tf_broadcaster = TransformBroadcaster()
 
         self.particle_cloud = []
-        self.most_probable_particle = Particle() # Save the most probable particle here
+        self.mean_particle = Particle() # Save the most probable particle here
 
         self.current_odom_xy_theta = [0, 0, 0]
 
@@ -109,7 +109,7 @@ class ParticleFilter:
 
         # TODONE: assign the lastest pose into self.robot_pose as a geometry_msgs.Pose object
         # just to get started we will fix the robot's pose to always be at the origin
-        self.robot_pose = self.most_probable_particle.as_pose()
+        self.robot_pose = self.mean_particle.as_pose()
 
     def update_particles_with_odom(self, msg):
         """ Update the particles using the newly given odometry pose.
@@ -236,13 +236,15 @@ class ParticleFilter:
         # find the sum of particle weights
         s = sum([particle.w for particle in self.particle_cloud])
 
-        self.most_probable_particle = Particle()
+        self.mean_particle = Particle()
         # iterate through particle cloud to normalize
         for particle in self.particle_cloud:
             particle.w /= s
-            if particle.w > self.most_probable_particle.w:
-                # Save the particle with the highest weight
-                self.most_probable_particle = particle
+
+            # Cumulate the heading of the mean particle.
+            self.mean_particle.x += particle.w * particle.x
+            self.mean_particle.y += particle.w * particle.y
+            self.mean_particle.theta += particle.w * particle.theta
 
     def publish_particles(self, msg):
         particles_conv = []
