@@ -1,5 +1,5 @@
 import tf
-from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import Pose, Point, Quaternion
 
 class Particle(object):
     """ Represents a hypothesis (particle) of the robot's pose consisting of x,y and theta (yaw)

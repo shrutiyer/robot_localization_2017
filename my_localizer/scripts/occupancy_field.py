@@ -33,7 +33,8 @@ class OccupancyField(object):
     """
 
     def __init__(self, map):
-        self.MAX_DISTANCE_OUT_OF_BOUNDS = 4 # When point is out of the map, we set a placeholder error (or max distance of laser)
+        self.MAX_DISTANCE_OUT_OF_BOUNDS = rospy.get_param('~max_distance_out_of_bounds', 4) # When point is out of the map, we set a placeholder error (or max distance of laser)
+        self.error_distribution_scale = rospy.get_param('~error_distribution_scale', 100)
         self.map = map      # save this for later
         # build up a numpy array of the coordinates of each grid cell in the map
         X = np.zeros((self.map.info.width*self.map.info.height,2))
@@ -110,4 +111,4 @@ class OccupancyField(object):
         ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
 
         # Returns the sum of the distances of all points.
-        return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=100)
+        return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=self.error_distribution_scale)
