@@ -10,6 +10,10 @@ The major goal of the project is to learn how to position a robot in a space usi
 
 We start by initializing a particle cloud, where we draw a particle’s location and heading from a normal distribution. Then, we update the particles in the particle cloud using data from the actual robot’s odometry. After all of the particles have been updated, we re-weigh each particle based on their compatibility with data from the laser scan. In this step, we wrote our own occupancy field evaluation function by computing the data in matrix form. We then resample a new set of particles by simple random sampling from the old particle cloud with probability proportional to their weight.
 
+Our robot localizer in action:
+
+![alt text](https://github.com/shrutiyer/robot_localization_2017/blob/master/my_localizer/images/ac109_1.gif)
+
 ## Design Decisions
 
 We wanted to reduce time to compute the closest neighbor for multiple angles of multiple particles. So we used numpy and made the computation faster by using arrays. 
