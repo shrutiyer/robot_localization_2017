@@ -6,7 +6,7 @@
     name="map_server"
     pkg="map_server"
     type="map_server"
-    args="$(find my_localizer)/maps/ac109_1.yaml"/>
+    args="$(find my_localizer)/maps/ac109_2.yaml"/>
 
   <!-- Localization -->
   <node name="pf" pkg="my_localizer" type="pf.py" output="screen">
