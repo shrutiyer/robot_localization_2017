@@ -20,22 +20,24 @@ We wanted to reduce time to compute the closest neighbor for multiple angles of 
 
 ```python
 def get_closest_obstacle_distance_matrix(self, x_array, y_array):
-    x_coord_array = np.divide(np.subtract(x_array, self.map.info.origin.position.x), self.map.info.resolution)
-    y_coord_array = np.divide(np.subtract(y_array, self.map.info.origin.position.y), self.map.info.resolution)
-    x_coord_array = x_coord_array.astype(int)
-    y_coord_array = y_coord_array.astype(int)
+        """ The math below is same as the function 'get_closest_obstacle_distance' except
+            that it accepts arrays for x and y to speed up the calculation"""
+        x_coord_array = np.divide(np.subtract(x_array, self.map.info.origin.position.x), self.map.info.resolution)
+        y_coord_array = np.divide(np.subtract(y_array, self.map.info.origin.position.y), self.map.info.resolution)
+        x_coord_array = x_coord_array.astype(int)
+        y_coord_array = y_coord_array.astype(int)
 
-    x_nan_indexes = np.where(np.logical_or(x_coord_array > self.map.info.width, x_coord_array < 0))
-    y_nan_indexes = np.where(np.logical_or(y_coord_array > self.map.info.height, y_coord_array < 0))
-    out_of_bounds_indexes = np.unique(np.append(x_nan_indexes, y_nan_indexes))
+        x_nan_indexes = np.where(np.logical_or(x_coord_array > self.map.info.width, x_coord_array < 0))
+        y_nan_indexes = np.where(np.logical_or(y_coord_array > self.map.info.height, y_coord_array < 0))
+        out_of_bounds_indexes = np.unique(np.append(x_nan_indexes, y_nan_indexes))
 
-    np.delete(x_coord_array, out_of_bounds_indexes)
-    np.delete(y_coord_array, out_of_bounds_indexes)
+        np.delete(x_coord_array, out_of_bounds_indexes)
+        np.delete(y_coord_array, out_of_bounds_indexes)
 
-    ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
+        ind_array = np.add(x_coord_array, np.multiply(y_coord_array, self.map.info.width))
 
-    # Returns the sum of the distances of all points.
-    return halfnorm.pdf(np.sum(self.closest_occ[ind_array]) + len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS, scale=100)
+        # Returns the sum of the distances of all points.
+        return np.sum(halfnorm.pdf(self.closest_occ[ind_array], scale=self.error_distribution_scale)) + np.sum(len(out_of_bounds_indexes) * self.MAX_DISTANCE_OUT_OF_BOUNDS)
 ```
 ## Challenges Faced
 
