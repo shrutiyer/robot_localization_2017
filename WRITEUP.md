@@ -12,7 +12,7 @@ We start by initializing a particle cloud, where we draw a particle’s location
 
 Our robot localizer in action:
 
-![alt text](https://github.com/shrutiyer/robot_localization_2017/blob/master/my_localizer/images/ac109_1.gif)
+![alt text](https://github.com/shrutiyer/robot_localization_2017/blob/master/my_localizer/images/ac109_2.gif)
 
 ## Design Decisions
 
